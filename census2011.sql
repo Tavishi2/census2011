@@ -65,7 +65,30 @@ select round(g.tot_area/f.previous_census_population,4) area_per_prev, round(g.t
 (select '1' as xyz, sum(area_km2) tot_area from data2)g 
 where f.xyz=g.xyz;
 
+-- literacy status of districts of each state
+select district,state,literacy,
+CASE
+    when literacy > 80 then 'excellent'
+    when literacy<=80 and literacy>60 then 'good'
+    else 'poor'
+    end
+    as literacy_status
+from data1;
 
+-- top and bottom 3 states in literacy rate
+
+drop temporary table if exists topstates;
+create temporary table topstates(state varchar(100), topstate float);
+insert into topstates (select state, round(avg(literacy),0) avg_literacy_ratio  from data1 group by state order by avg_literacy_ratio desc);
+select * from topstates  limit 3;
+
+drop temporary table if exists bottomstates;
+create temporary table bottomstates(state varchar(100), topstate float);
+insert into bottomstates(select state, round(avg(literacy),0) avg_literacy_ratio  from data1 group by state order by avg_literacy_ratio);
+select * from bottomstates limit 3;
+
+-- union operator
+(select * from topstates  limit 3) union (select * from bottomstates limit 3); 
 
 
 
